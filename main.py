@@ -1,14 +1,7 @@
 import re
-import json
 import pandas
 
-with open(r'C:\Users\skochanski\Desktop\CSV\BLD01.csv') as c:
-    file = c.read()
 
-listed = file.split('\n')
-listed = list(map(lambda x: x.replace(' ', ''), listed))
-pattern = [r"%(.*)", r"!(.*)"]
-current_index = ''
 
 
 def check_previous_and_next_line(current_index, listed):
@@ -42,8 +35,9 @@ def create_table_element(current_index, listed):
     return {'columns': columns, 'table_name': data_name, 'data': data}
 
 
-def create_tables():
+def create_tables(listed):
     tables = []
+    pattern = [r"%(.*)", r"!(.*)"]
     for elem in listed:
         current_index = listed.index(elem)
         for p in pattern:
@@ -78,20 +72,38 @@ def extract_from_dataframe(dataframes):
     # Write name of table
     table_name = 'COVERINGS'
     for df in dataframes:
+        lista = []
         if table_name in df['name']:
             # Variable as series
-            extracted_series = df['dataframe']['COLOR']
-            # Variable as list
-            extracted_list = list(extracted_series)
-            return extracted_list
+            extracted_series_part = df['dataframe']['PART_NUMBER']
+            extracted_series_xy = df['dataframe']['XY']
+            extracted_series_color = df['dataframe']['COLOR']
+            k = 0
+            for s in extracted_series_color:
+                if s != 'BLACK' and s is not None:
+                    lista.append(extracted_series_xy[k])
+                    lista.append(extracted_series_part[k])
+                k=k+1
+            return lista
 
+def czytaj_csv(path):
+    with open(r'' + path) as c:
+        file = c.read()
 
-if __name__ == '__main__':
-    tables = create_tables()
+    listedd = file.split('\n')
+    listedd = list(map(lambda x: x.replace(' ', ''), listedd))
+    #pattern = [r"%(.*)", r"!(.*)"]
+    #current_index = ''
+
+    tables = create_tables(listedd)
     tables_prepared_to_dataframe = prepare_to_dataframe(tables)
     dataframes = create_dataframe(tables_prepared_to_dataframe)
     output = extract_from_dataframe(dataframes)
-    print(2)
+    return output
+
+if __name__ == '__main__':
+
+    print(czytaj_csv('COMPOSITE-ALL.csv'))
 
 """my_data = []
 for table in tables:
